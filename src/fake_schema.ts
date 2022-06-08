@@ -124,13 +124,8 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
       if (valueCB) {
         return valueCB();
       }
-      if (!isEnumType(type)) {
-        const autoFaked = getAutoFakedValue(fieldDef);
-        if (autoFaked) {
-          return autoFaked();
-        }
-      }
-      return fakeLeafValueCB(type);
+
+      return fakeLeafValueCB(type, fieldDef);
     } else {
       // TODO: error on fake directive
       const __typename: string = isAbstractType(type)
@@ -163,14 +158,24 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
   }
 };
 
-function fakeLeafValueCB(type: GraphQLLeafType) {
+function fakeLeafValueCB(
+  type: GraphQLLeafType,
+  fieldDef: GraphQLField<any, any, Record<string, any>>,
+) {
   if (isEnumType(type)) {
     const values = type.getValues().map((x) => x.value);
     return getRandomItem(values);
   }
 
-  const faker = stdScalarFakers[type.name];
-  if (faker) return faker();
+  if (type.name !== 'String' && type.name !== 'Float') {
+    const faker = stdScalarFakers[type.name];
+    if (faker) return faker();
+  } else {
+    const autoFaked = getAutoFakedValue(fieldDef);
+    if (autoFaked) {
+      return autoFaked();
+    }
+  }
 
   return `<${type.name}>`;
 }
