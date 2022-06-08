@@ -170,11 +170,11 @@ function fakeLeafValueCB(
   if (type.name !== 'String' && type.name !== 'Float') {
     const faker = stdScalarFakers[type.name];
     if (faker) return faker();
-  } else {
-    const autoFaked = getAutoFakedValue(fieldDef);
-    if (autoFaked) {
-      return autoFaked();
-    }
+  }
+
+  const autoFaked = getAutoFakedValue(fieldDef);
+  if (autoFaked) {
+    return autoFaked();
   }
 
   return `<${type.name}>`;
