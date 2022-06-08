@@ -24,7 +24,7 @@ import {
   fakeValue,
 } from './fake';
 import { runFakerUsingPath, startsWithOneOf } from './utils';
-import { fakerTypes } from './types';
+import { fakerTypes } from './fakerTypes';
 import Fuse from 'fuse.js';
 
 const fuse = new Fuse(fakerTypes, { keys: ['keywords'] });
