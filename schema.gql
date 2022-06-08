@@ -1,0 +1,125 @@
+scalar Date
+
+schema {
+  query: Query
+}
+
+interface Node {
+  id: ID!
+}
+
+type Query {
+  client(id: ID!): Client!
+
+  instance(id: ID!): Instance!
+}
+
+type Client implements Node {
+  id: ID! # base64("Client", clients.id)
+  name: String!
+  transactions: TransactionConnection!
+  currentCreditBalance: Int!
+  creditEstimatesInProgress: Int!
+  instances: [Instance!]!
+}
+
+type TransactionConnection {
+  edges: [TransactionEdge!]!
+}
+
+type TransactionEdge {
+  node: Transaction!
+}
+
+union Transaction = MonthlyCreditUsage | ReceivedPayment
+
+type MonthlyCreditUsage implements Node {
+  id: ID! # base64("MonthlyCreditUsage", clients.id, date)
+  date: Date!
+  amount: Int! # positive
+  balance: Int!
+  status: MonthlyCreditUsageStatus!
+  instances: [Instance!]!
+}
+
+enum MonthlyCreditUsageStatus {
+  DRAFT
+  FINAL
+}
+
+type Instance implements Node {
+  id: ID! # base64("ClientInstance", client_projects.id)
+  name: String!
+  tickets: TicketConnection!
+}
+
+type TicketConnection {
+  edges: [TicketEdge!]!
+}
+
+type TicketEdge {
+  # ... (cursor, etc.)
+  node: Ticket!
+}
+
+type Ticket implements Node {
+  id: ID! # base64("Ticket", tickets.id)
+  code: String!
+  title: String!
+  status: TicketStatus!
+  completedAt: Date!
+  cost: Int!
+  pullRequests: [PullRequest!]!
+  refunds: [Refund!]!
+}
+
+enum TicketStatus {
+  AVAILABLE
+  BACKLOG
+  BLOCKED
+  CANCELLED
+  ERRORED
+  FINISHED
+  IN_PROGRESS
+  PARTIALLY_BLOCKED
+  PARTIALLY_UNDER_REVIEW
+  UNDER_REVIEW
+}
+
+type Refund implements Node {
+  id: ID! # base64(ticket_refund.id)
+  appliedAt: Date!
+  reason: String!
+  amount: Int! # positive
+}
+
+type PullRequest implements Node {
+  id: ID! # base64("PullRequest", git_pull_request.id)
+  completedAt: Date! # date of PR when closed or merged
+  title: String!
+  status: PullRequestStatus! # state
+  cost: Int! # computed from tasks credit
+}
+
+enum PullRequestStatus {
+  OPEN
+  MERGED
+  CLOSED
+}
+
+type ReceivedPayment implements Node { # only successfully received money
+  id: ID! # base64("ReceivedPayment", client_transactions.id)
+  date: Date!
+  amount: Int! # positive
+  balance: Int!
+  status: ReceivedPaymentStatus!
+}
+
+# client_transaction statuses
+enum ReceivedPaymentStatus {
+  CANCELLED
+  FAILED
+  IN_PROGRESS
+  PENDING
+  SUCCESSFUL
+}

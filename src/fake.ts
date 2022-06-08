@@ -1,5 +1,5 @@
-import * as faker from 'faker';
-import * as moment from 'moment';
+import faker from 'faker';
+import moment from 'moment';
 
 export function getRandomInt(min: number, max: number) {
   return faker.datatype.number({ min, max });

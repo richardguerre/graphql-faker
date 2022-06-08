@@ -1,4 +1,5 @@
-import * as assert from 'assert';
+import faker from 'faker';
+import assert from 'assert';
 import {
   isListType,
   isNonNullType,
@@ -13,6 +14,7 @@ import {
   defaultTypeResolver,
   defaultFieldResolver,
   getDirectiveValues,
+  GraphQLField,
 } from 'graphql';
 
 import {
@@ -21,6 +23,11 @@ import {
   stdScalarFakers,
   fakeValue,
 } from './fake';
+import { runFakerUsingPath, startsWithOneOf } from './utils';
+import { fakerTypes } from './types';
+import Fuse from 'fuse.js';
+
+const fuse = new Fuse(fakerTypes, { keys: ['keywords'] });
 
 type FakeArgs = {
   type: string;
@@ -117,6 +124,12 @@ export const fakeFieldResolver: GraphQLFieldResolver<unknown, unknown> = async (
       if (valueCB) {
         return valueCB();
       }
+      if (!isEnumType(type)) {
+        const autoFaked = getAutoFakedValue(fieldDef);
+        if (autoFaked) {
+          return autoFaked();
+        }
+      }
       return fakeLeafValueCB(type);
     } else {
       // TODO: error on fake directive
@@ -186,4 +199,40 @@ function isPlainObject(maybeObject) {
     maybeObject !== null &&
     !Array.isArray(maybeObject)
   );
+}
+
+function getAutoFakedValue(
+  fieldDef: GraphQLField<any, any, Record<string, any>>,
+) {
+  const lowerCasedName = fieldDef.name.toLowerCase() ?? '';
+  if (
+    startsWithOneOf(lowerCasedName, [
+      'is',
+      'was',
+      'has',
+      'had',
+      'can',
+      'will',
+      'need',
+      'use',
+    ])
+  ) {
+    return faker.datatype.boolean;
+  }
+  if (lowerCasedName.endsWith('id')) {
+    return () => Math.floor(Math.random() * 1000);
+  }
+  if (
+    !['createdat', 'updatedat', 'created_at', 'updated_at'].includes(
+      lowerCasedName,
+    ) &&
+    lowerCasedName.endsWith('at')
+  ) {
+    return faker.date.recent;
+  }
+
+  const results = fuse.search(fieldDef.name ?? '');
+  if (results.length > 0 && results[0]?.item.type) {
+    return () => runFakerUsingPath(results[0]?.item.type);
+  }
 }

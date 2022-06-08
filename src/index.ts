@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 
-import * as fs from 'fs';
-import * as path from 'path';
+import fs from 'fs';
+import path from 'path';
 
-import * as express from 'express';
-import * as chalk from 'chalk';
-import * as open from 'open';
-import * as cors from 'cors';
-import * as bodyParser from 'body-parser';
+import express from 'express';
+import chalk from 'chalk';
+import open from 'open';
+import cors from 'cors';
+import bodyParser from 'body-parser';
 import { graphqlHTTP } from 'express-graphql';
 import { Source, printSchema } from 'graphql';
 import { express as voyagerMiddleware } from 'graphql-voyager/middleware';
