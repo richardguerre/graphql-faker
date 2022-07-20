@@ -1,4 +1,4 @@
-export const fakerTypes = [
+export const fakerTypes: Array<{ type: FakerPath; keywords: Array<string> }> = [
   {
     type: 'faker.random.arrayElement',
     keywords: ['random', 'arrayElement', 'random arrayElement'],
@@ -677,10 +677,6 @@ export const fakerTypes = [
     keywords: ['weekday', 'date weekday'],
   },
   {
-    type: 'faker.time.recent',
-    keywords: ['time', 'time recent'],
-  },
-  {
     type: 'faker.commerce.color',
     keywords: ['commerce', 'color', 'commerce color'],
   },
@@ -1070,7 +1066,6 @@ export type FakerPath =
   | 'faker.date.soon'
   | 'faker.date.month'
   | 'faker.date.weekday'
-  | 'faker.time.recent'
   | 'faker.commerce.color'
   | 'faker.commerce.department'
   | 'faker.commerce.productName'

@@ -7,7 +7,7 @@ import {
   buildClientSchema,
   getIntrospectionQuery,
 } from 'graphql';
-import * as faker from 'faker';
+import { faker } from '@faker-js/faker';
 
 export function existsSync(filePath: string): boolean {
   try {
